@@ -27,13 +27,13 @@
 <meta property="og:site_name" content="machine learning">
 <meta property="og:description" content="决策树原理学习笔记一：构造构造的过程就是选择什么属性作为节点的过程，节点分成三种：1.根节点（树的最顶端，最开始的节点）2.内部节点（树的中间节点） 3.叶节点（树的最底部节点，决策的结果） 二：剪枝剪枝可以分为“预剪枝“（Pre-Pruning）和“后剪枝”（Post-Pruning） 预剪枝是在决策树构造时就进行剪枝。方法是在构造的过程中对节点进行评估，如果对某个节点进行划分，在验证集中不能带">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="c:%5CUsers%5Cadmin%5CDesktop%5C741f0ed01c53fd53f0e75204542abed5.png">
-<meta property="og:image" content="c:%5CUsers%5Cadmin%5CDesktop%5Cbfea7626733fff6180341c9dda3d4334.png">
-<meta property="article:published_time" content="2020-07-11T10:41:41.152Z">
-<meta property="article:modified_time" content="2020-07-11T10:41:41.295Z">
+<meta property="og:image" content="http://xinzhuo777.github.io/.io//D:%5Cblog%5Csource_posts%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.assets%5C741f0ed01c53fd53f0e75204542abed5.png">
+<meta property="og:image" content="http://xinzhuo777.github.io/.io//D:%5Cblog%5Csource_posts%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.assets%5Cbfea7626733fff6180341c9dda3d4334.png">
+<meta property="article:published_time" content="2020-07-11T11:04:56.216Z">
+<meta property="article:modified_time" content="2020-07-11T11:07:00.856Z">
 <meta property="article:author" content="Xinzhuo Li">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="c:%5CUsers%5Cadmin%5CDesktop%5C741f0ed01c53fd53f0e75204542abed5.png">
+<meta name="twitter:image" content="http://xinzhuo777.github.io/.io//D:%5Cblog%5Csource_posts%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.assets%5C741f0ed01c53fd53f0e75204542abed5.png">
 
 <link rel="canonical" href="http://xinzhuo777.github.io/2020/07/11/%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
 
@@ -175,8 +175,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2020-07-11 18:41:41" itemprop="dateCreated datePublished" datetime="2020-07-11T18:41:41+08:00">2020-07-11</time>
+              <time title="Created: 2020-07-11 19:04:56 / Modified: 19:07:00" itemprop="dateCreated datePublished" datetime="2020-07-11T19:04:56+08:00">2020-07-11</time>
             </span>
 
           
@@ -198,12 +199,12 @@
 <p>决策树构建中比较重要的三个问题：将哪个属性作为根节点？选择哪些属性作为后继节点？什么时候停止并得到目标值？</p>
 <p>由此引入信息熵这个概念。</p>
 <h2 id="三：信息熵"><a href="#三：信息熵" class="headerlink" title="三：信息熵"></a>三：信息熵</h2><p>信息熵（entropy），它表示了信息的不确定度。在信息论中，随机离散事件出现的概率存在着不确定性。为了衡量这种信息的不确定性，信息学之父香农引入了信息熵的概念，并给出了计算信息熵的数学公式：</p>
-<p><img src="C:%5CUsers%5Cadmin%5CDesktop%5C741f0ed01c53fd53f0e75204542abed5.png" alt="741f0ed01c53fd53f0e75204542abed5"></p>
+<p><img src="/.io//D:%5Cblog%5Csource_posts%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.assets%5C741f0ed01c53fd53f0e75204542abed5.png" alt="741f0ed01c53fd53f0e75204542abed5"></p>
 <p>p(i|t) 代表了节点 t 为分类 i 的概率，其中 log2 为取以 2 为底的对数。这里我们不是来介绍公式的，而是说存在一种度量，它能帮我们反映出来这个信息的不确定度。当不确定性越大时，它所包含的信息量也就越大，信息熵也就越高。</p>
 <p><strong>纯度</strong>把决策树的构造过程理解成为寻找纯净划分的过程。数学上，我们可以用纯度来表示，纯度换一种方式来解释就是让目标变量的分歧最小。信息熵越大，纯度越低。当集合中的所有样本均匀混合时，信息熵最大，纯度最低。</p>
 <p>构造决策树的时候，会基于纯度来构建。而经典的 “不纯度”的指标有三种，分别是信息增益（ID3 算法）、信息增益率（C4.5 算法）以及基尼指数（Cart 算法）。</p>
 <h2 id="ID3-算法"><a href="#ID3-算法" class="headerlink" title="ID3 算法"></a>ID3 算法</h2><p>ID3 算法计算的是信息增益，信息增益指的就是划分可以带来纯度的提高，信息熵的下降。它的计算公式，是父亲节点的信息熵减去所有子节点的信息熵。在计算的过程中，我们会计算每个子节点的归一化信息熵，即按照每个子节点在父节点中出现的概率，来计算这些子节点的信息熵。所以信息增益的公式可以表示为：</p>
-<p><img src="C:%5CUsers%5Cadmin%5CDesktop%5Cbfea7626733fff6180341c9dda3d4334.png" alt="bfea7626733fff6180341c9dda3d4334"></p>
+<p><img src="/.io//D:%5Cblog%5Csource_posts%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%5C%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.assets%5Cbfea7626733fff6180341c9dda3d4334.png" alt="bfea7626733fff6180341c9dda3d4334"></p>
 <p>公式中 D 是父亲节点，Di 是子节点，Gain(D,a) 中的 a 作为 D 节点的属性选择。 ID3 就是要将信息增益最大的节点作为父节点，这样可以得到纯度高的决策树。</p>
 <p>ID3 的算法规则相对简单，可解释性强。同样也存在缺陷，比如我们会发现 ID3 算法倾向于选择取值比较多的属性。有些属性可能对分类任务没有太大作用，但是他们仍然可能会被选为最优属性。这种缺陷不是每次都会发生，只是存在一定的概率。在大部分情况下，ID3 都能生成不错的决策树分类。针对可能发生的缺陷，后人提出了新的算法进行改进</p>
 <h2 id="C4-5-算法"><a href="#C4-5-算法" class="headerlink" title="C4.5 算法"></a>C4.5 算法</h2><ol>
