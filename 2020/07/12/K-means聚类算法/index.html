@@ -28,7 +28,7 @@
 <meta property="og:description" content="K-means的基本原理K-Means 是一种非监督学习，解决的是聚类问题。K 代表的是 K 类，Means 代表的是中心，这个算法的本质是确定 K 类的中心点，当你找到了这些中心点，也就完成了聚类。基本的步骤如下：（采用欧氏距离分析） 1.选取 K 个点作为初始的类中心点，这些点一般都是从数据集中随机抽取的 2.将每个点分配到最近的类中心点，这样就形成了 K 个类，然后重新计算每个类的中心点 3">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-12T09:43:31.000Z">
-<meta property="article:modified_time" content="2020-07-12T12:20:41.452Z">
+<meta property="article:modified_time" content="2020-07-12T12:23:59.433Z">
 <meta property="article:author" content="Xinzhuo Li">
 <meta name="twitter:card" content="summary">
 
@@ -174,7 +174,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-07-12 17:43:31 / Modified: 20:20:41" itemprop="dateCreated datePublished" datetime="2020-07-12T17:43:31+08:00">2020-07-12</time>
+              <time title="Created: 2020-07-12 17:43:31 / Modified: 20:23:59" itemprop="dateCreated datePublished" datetime="2020-07-12T17:43:31+08:00">2020-07-12</time>
             </span>
 
           
@@ -200,7 +200,7 @@
 <p>init {‘k-means++’, ‘random’, ndarray, callable}, default=’k-means++’： 即初始值选择的方式，默认是采用优化过的 k-means++ 方式，你也可以自己指定中心点，或者采用 random 完全随机的方式。自己设置中心点一般是对于个性化的数据进行设置，很少采用。random 的方式则是完全随机的方式，一般推荐采用优化过的 k-means++ 方式。</p>
 <p>algorithm：k-means 的实现算法，有“auto” “full”“elkan”三种。一般来说建议直接用默认的”auto”。简单说下这三个取值的区别，如果你选择”full”采用的是传统的 K-Means 算法，“auto”会根据数据的特点自动选择是选择“full”还是“elkan”。我们一般选择默认的取值，即“auto” 。</p>
 <h2 id="K-means的小运用"><a href="#K-means的小运用" class="headerlink" title="K-means的小运用"></a>K-means的小运用</h2><p>图像分割：图像分割就是利用图像自身的信息，比如颜色、纹理、形状等特征进行划分，将图像分割成不同的区域，划分出来的每个区域就相当于是对图像中的像素进行了聚类。单个区域内的像素之间的相似度大，不同区域间的像素差异性大。这个特性正好符合聚类的特性，所以你可以把图像分割看成是将图像中的信息进行聚类。当然聚类只是分割图像的一种方式，除了聚类，我们还可以基于图像颜色的阈值进行分割，或者基于图像边缘的信息进行分割等</p>
-<p>例如此图：<br>！<a href="![1](D:\blog\source\_posts\K-means聚类算法\1.png">图片</a>)</p>
+<p>例如此图：<br>！<a href="![1](/image/1.png">图片</a>)</p>
 
     </div>
 
