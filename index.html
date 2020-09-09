@@ -317,7 +317,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-10 00:08:37" itemprop="dateModified" datetime="2020-09-10T00:08:37+08:00">2020-09-10</time>
+                <time title="Modified: 2020-09-10 00:10:52" itemprop="dateModified" datetime="2020-09-10T00:10:52+08:00">2020-09-10</time>
               </span>
 
           
@@ -366,10 +366,11 @@ y_i(w^Tx_i+b)\ge1</script><p>构造拉格朗日函数</p>
 L(w,b,\alpha)=\frac{1}{2}*\frac{1}{||w||}-\sum_{1}^{n}\alpha_i*(y_i*(w^T*x_i+b)-1)</script><p>则原优化问题可以转化为</p>
 <p>$\theta(w)=maxL(w,b,\alpha),\alpha_i&gt;0$</p>
 <p>求偏导得到： </p>
-<p>$\pmb{w}=\sum<em>{i=1}^{n}\alpha_iy_i\pmb{x_i}$      $0=\sum</em>{i=1}^{n}\alpha_iy_i$</p>
-<p>代入有</p>
-<p>$max(\sum<em>{i=1}^{n}\alpha_i-\frac{1}{2}\sum</em>{i=1}^{n}\sum_{j=1}^{n}\alpha_i\alpha_jy_iy_j\pmb{x_i^{T}x_j})$</p>
-<p>如何求解上述式子，运用KKT条件</p>
+<script type="math/tex; mode=display">
+\pmb{w}=\sum_{i=1}^{n}\alpha_iy_i\pmb{x_i}</script><script type="math/tex; mode=display">
+0=\sum_{i=1}^{n}\alpha_iy_i</script><p>代入有</p>
+<script type="math/tex; mode=display">
+max(\sum_{i=1}^{n}\alpha_i-\frac{1}{2}\sum_{i=1}^{n}\sum_{j=1}^{n}\alpha_i\alpha_jy_iy_j\pmb{x_i^{T}x_j})</script><p>如何求解上述式子，运用KKT条件</p>
 <script type="math/tex; mode=display">\left\{ \begin{array}{rcl} \alpha_i>0  & & {    }\\ y_i(w^T\pmb{x}+b)\ge0    &      & {}\\ \alpha_i(y_i(w^T\pmb{x}+b)) =0 {}\end{array}\right.</script><p>这是一个对偶问题（凸优化，对偶问题，具体理论太数学，目前水平有限就暂时不做自己推导了）</p>
 <h3 id="SMO算法"><a href="#SMO算法" class="headerlink" title="SMO算法"></a>SMO算法</h3><p>整个SMO算法包括两部分，求解两个变量的二次规划问题和选择这两个变量的启发式方法。我觉得SMO算法难就难在对两个α变量的选择过程。</p>
 <p>$\sum_{i=1}^{n}\alpha_iy_i=0$,如果取$\alpha_1和\alpha_2$,定下$\alpha_2$的值，利用KKT条件，我们可以得出$\alpha_1$的值</p>
