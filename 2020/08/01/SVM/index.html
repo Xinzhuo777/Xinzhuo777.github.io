@@ -29,7 +29,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://raw.githubusercontent.com/Xinzhuo777/picgo/master/imagesvm%20.png">
 <meta property="article:published_time" content="2020-08-01T05:15:38.000Z">
-<meta property="article:modified_time" content="2020-09-09T16:10:52.897Z">
+<meta property="article:modified_time" content="2020-09-10T11:08:29.559Z">
 <meta property="article:author" content="Xinzhuo Li">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Xinzhuo777/picgo/master/imagesvm%20.png">
@@ -182,7 +182,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-10 00:10:52" itemprop="dateModified" datetime="2020-09-10T00:10:52+08:00">2020-09-10</time>
+                <time title="Modified: 2020-09-10 19:08:29" itemprop="dateModified" datetime="2020-09-10T19:08:29+08:00">2020-09-10</time>
               </span>
 
           
@@ -236,7 +236,7 @@ L(w,b,\alpha)=\frac{1}{2}*\frac{1}{||w||}-\sum_{1}^{n}\alpha_i*(y_i*(w^T*x_i+b)-
 0=\sum_{i=1}^{n}\alpha_iy_i</script><p>代入有</p>
 <script type="math/tex; mode=display">
 max(\sum_{i=1}^{n}\alpha_i-\frac{1}{2}\sum_{i=1}^{n}\sum_{j=1}^{n}\alpha_i\alpha_jy_iy_j\pmb{x_i^{T}x_j})</script><p>如何求解上述式子，运用KKT条件</p>
-<script type="math/tex; mode=display">\left\{ \begin{array}{rcl} \alpha_i>0  & & {    }\\ y_i(w^T\pmb{x}+b)\ge0    &      & {}\\ \alpha_i(y_i(w^T\pmb{x}+b)) =0 {}\end{array}\right.</script><p>这是一个对偶问题（凸优化，对偶问题，具体理论太数学，目前水平有限就暂时不做自己推导了）</p>
+<script type="math/tex; mode=display">\left\{ \begin{array}{rcl} \alpha_i>0  & & {    }\\ y_i(w^T\pmb{x}+b)\ge0    &      & {}\\ \alpha_i(y_i(w^T\pmb{x}+b)-1) =0 {}\end{array}\right.</script><p>这是一个对偶问题（凸优化，对偶问题，具体理论太数学，目前水平有限就暂时不做自己推导了）</p>
 <h3 id="SMO算法"><a href="#SMO算法" class="headerlink" title="SMO算法"></a>SMO算法</h3><p>整个SMO算法包括两部分，求解两个变量的二次规划问题和选择这两个变量的启发式方法。我觉得SMO算法难就难在对两个α变量的选择过程。</p>
 <p>$\sum_{i=1}^{n}\alpha_iy_i=0$,如果取$\alpha_1和\alpha_2$,定下$\alpha_2$的值，利用KKT条件，我们可以得出$\alpha_1$的值</p>
 <p>这是一个关于两个$\alpha$的二次规划问题（我不想手敲了。。。）</p>
