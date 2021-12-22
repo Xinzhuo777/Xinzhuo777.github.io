@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xinzhuo777.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Docker网络端口映射在启动容器的时候，如果不指定对应的端口，在容器外将无法通过网络来访问容器内的服务。Docker提供端口映射机制来将容器内的服务提供给外部网络访问，实质上就是将宿主机的端口映射到容器中，使得外部网络访问主机的端口便可访问容器内的服务。 1..实现端口映射，需要在运行docker run命令时使用-P（大写）选项实现随机映射，Docker会随机映射一个端口范围在49000~49">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker网络管理">
+<meta property="og:url" content="http://xinzhuo777.github.io/2021/04/19/Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="machine learning">
+<meta property="og:description" content="Docker网络端口映射在启动容器的时候，如果不指定对应的端口，在容器外将无法通过网络来访问容器内的服务。Docker提供端口映射机制来将容器内的服务提供给外部网络访问，实质上就是将宿主机的端口映射到容器中，使得外部网络访问主机的端口便可访问容器内的服务。 1..实现端口映射，需要在运行docker run命令时使用-P（大写）选项实现随机映射，Docker会随机映射一个端口范围在49000~49">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_1.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_2.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_4.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_5.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_6.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_7.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_8.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_9.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_10.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_11.png?raw=true">
+<meta property="og:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_12.png?raw=true">
+<meta property="article:published_time" content="2021-04-19T04:37:28.000Z">
+<meta property="article:modified_time" content="2021-04-19T13:15:22.000Z">
+<meta property="article:author" content="Xinzhuo Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_1.png?raw=true">
+
+<link rel="canonical" href="http://xinzhuo777.github.io/2021/04/19/Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Docker网络管理 | machine learning</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="machine learning" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">machine learning</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://xinzhuo777.github.io/2021/04/19/Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xinzhuo Li">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="machine learning">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker网络管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-04-19 12:37:28 / Modified: 21:15:22" itemprop="dateCreated datePublished" datetime="2021-04-19T12:37:28+08:00">2021-04-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Docker网络"><a href="#Docker网络" class="headerlink" title="Docker网络"></a>Docker网络</h1><h2 id="端口映射"><a href="#端口映射" class="headerlink" title="端口映射"></a>端口映射</h2><p>在启动容器的时候，如果不指定对应的端口，在容器外将无法通过网络来访问容器内的服务。Docker提供端口映射机制来将容器内的服务提供给外部网络访问，实质上就是将宿主机的端口映射到容器中，使得外部网络访问主机的端口便可访问容器内的服务。</p>
+<p>1..实现端口映射，需要在运行docker run命令时使用-P（大写）选项实现随机映射，Docker会随机映射一个端口范围在49000~49900的端口到容器内部开放的网络端口。</p>
+<p>2.查看本机的端口是否映射到了容器中的端口<br><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_1.png?raw=true"></p>
+<p>3.还可以在运行docker run命令时使用-p（小写）选项指定要映射的端口。如：</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_2.png?raw=true"></p>
+<h2 id="容器互联—link指令"><a href="#容器互联—link指令" class="headerlink" title="容器互联—link指令"></a>容器互联—link指令</h2><p>容器互联就是通过容器的名称在容器间建立一条专门的网络通信隧道从而实现容器的互联。</p>
+<p>注意：如果已经命名了一个相同的容器，当要再次使用这个名称时，需要使用docker rm命令删除之前创建的同名容器。</p>
+<p>1.创建源容器</p>
+<p>2.创建接收容器</p>
+<p>此处用—link来指定连接容器实现互联</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_4.png?raw=true"></p>
+<p>3.测试容器互联</p>
+<p>利用ping命令查看容器web2是否能相互连通</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_5.png?raw=true"></p>
+<h2 id="容器互联"><a href="#容器互联" class="headerlink" title="容器互联"></a>容器互联</h2><h3 id="新建网络"><a href="#新建网络" class="headerlink" title="新建网络"></a>新建网络</h3><p>下面先创建一个新的Docker网络</p>
+<p>docker network creat -d bridge my-net</p>
+<h3 id="连接容器"><a href="#连接容器" class="headerlink" title="连接容器"></a>连接容器</h3><p>再打开新的终端，再运行一个容器并加入到my-net网络</p>
+<p>docker run -it —rm —name busybox1 —network my-net busybox sh</p>
+<p>docker run -it —rm —name busybox2 —network my-net busybox sh</p>
+<p>可以用docker container ls</p>
+<p>用ping来测试两个容器是否连接</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_6.png?raw=true"><br><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_7.png?raw=true"><br><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_8.png?raw=true"><br><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_9.png?raw=true"></p>
+<h2 id="配置DNS"><a href="#配置DNS" class="headerlink" title="配置DNS"></a>配置DNS</h2><p>关于配置容器的主机名和DNS。秘诀就是Docker利用虚拟文件来挂载容器的3个相关配置文件</p>
+<p>在容器中使用mount命令可以看到挂载信息</p>
+<p>mount指令的作用是让宿主主机DNS信息发生更新后，所有Docker容器DNS配置通过 /etc/resolv.conf文件立刻得到更新。</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_10.png?raw=true"></p>
+<p>配置全部容器的DNS，也可以在/etc/docker/daemon.json文件中增加以下内容来设置。</p>
+<p>我们可以通过以下指令来证明命令生效：</p>
+<p>docker run -it —rm [主机名]  cat etc/resolv.conf</p>
+<h3 id="Docker的网络模式"><a href="#Docker的网络模式" class="headerlink" title="Docker的网络模式"></a>Docker的网络模式</h3><p>docker network ls 查看网络，默认创建三种网络</p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_11.png?raw=true"></p>
+<p><img src="https://github.com/Xinzhuo777/picgo/blob/master/imagepage1_12.png?raw=true"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/16/text1/" rel="prev" title="Docker数据管理">
+      <i class="fa fa-chevron-left"></i> Docker数据管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/21/compose/" rel="next" title="compose">
+      compose <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker网络"><span class="nav-number">1.</span> <span class="nav-text">Docker网络</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#端口映射"><span class="nav-number">1.1.</span> <span class="nav-text">端口映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器互联—link指令"><span class="nav-number">1.2.</span> <span class="nav-text">容器互联—link指令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器互联"><span class="nav-number">1.3.</span> <span class="nav-text">容器互联</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新建网络"><span class="nav-number">1.3.1.</span> <span class="nav-text">新建网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接容器"><span class="nav-number">1.3.2.</span> <span class="nav-text">连接容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DNS"><span class="nav-number">1.4.</span> <span class="nav-text">配置DNS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker的网络模式"><span class="nav-number">1.4.1.</span> <span class="nav-text">Docker的网络模式</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xinzhuo Li</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xinzhuo Li</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

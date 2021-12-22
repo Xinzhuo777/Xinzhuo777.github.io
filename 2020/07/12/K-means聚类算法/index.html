@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xinzhuo777.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="K-means的基本原理K-Means 是一种非监督学习，解决的是聚类问题。K 代表的是 K 类，Means 代表的是中心，这个算法的本质是确定 K 类的中心点，当你找到了这些中心点，也就完成了聚类。基本的步骤如下：（采用欧氏距离分析） 1.选取 K 个点作为初始的类中心点，这些点一般都是从数据集中随机抽取的 2.将每个点分配到最近的类中心点，这样就形成了 K 个类，然后重新计算每个类的中心点 3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K-means聚类算法">
+<meta property="og:url" content="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="machine learning">
+<meta property="og:description" content="K-means的基本原理K-Means 是一种非监督学习，解决的是聚类问题。K 代表的是 K 类，Means 代表的是中心，这个算法的本质是确定 K 类的中心点，当你找到了这些中心点，也就完成了聚类。基本的步骤如下：（采用欧氏距离分析） 1.选取 K 个点作为初始的类中心点，这些点一般都是从数据集中随机抽取的 2.将每个点分配到最近的类中心点，这样就形成了 K 个类，然后重新计算每个类的中心点 3">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/1.jpg">
+<meta property="og:image" content="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/new.jpg">
+<meta property="article:published_time" content="2020-07-12T09:43:31.000Z">
+<meta property="article:modified_time" content="2020-07-12T14:10:38.000Z">
+<meta property="article:author" content="Xinzhuo Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/1.jpg">
+
+<link rel="canonical" href="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>K-means聚类算法 | machine learning</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="machine learning" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">machine learning</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://xinzhuo777.github.io/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xinzhuo Li">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="machine learning">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          K-means聚类算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-07-12 17:43:31 / Modified: 22:10:38" itemprop="dateCreated datePublished" datetime="2020-07-12T17:43:31+08:00">2020-07-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="K-means的基本原理"><a href="#K-means的基本原理" class="headerlink" title="K-means的基本原理"></a>K-means的基本原理</h1><p>K-Means 是一种非监督学习，解决的是聚类问题。K 代表的是 K 类，Means 代表的是中心，这个算法的本质是确定 K 类的中心点，当你找到了这些中心点，也就完成了聚类。基本的步骤如下：（采用欧氏距离分析）</p>
+<p>1.选取 K 个点作为初始的类中心点，这些点一般都是从数据集中随机抽取的</p>
+<p>2.将每个点分配到最近的类中心点，这样就形成了 K 个类，然后重新计算每个类的中心点</p>
+<p>3.重复第二步，直到类不发生变化，或者你也可以设置最大迭代次数，这样即使类中心点发生变化，但是只要达到最大迭代次数就会结束</p>
+<h2 id="运用sklearn完成算法"><a href="#运用sklearn完成算法" class="headerlink" title="运用sklearn完成算法"></a>运用sklearn完成算法</h2><p>sklearn是Python中的库，内含K-means算法的函数，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">KMeans(n_clusters=<span class="number">8</span>, init=<span class="string">'k-means++'</span>, n_init=<span class="number">10</span>, max_iter=<span class="number">300</span>, tol=<span class="number">0.0001</span>, precompute_distances=<span class="string">'auto'</span>, verbose=<span class="number">0</span>, random_state=<span class="literal">None</span>, copy_x=<span class="literal">True</span>, n_jobs=<span class="number">1</span>, algorithm=<span class="string">'auto'</span>)</span><br></pre></td></tr></table></figure>
+<p>n_clusters: 即 K 值，K值的选择会对结果产生重大影响。K值较小，相当于用较小的邻域中对于训练实例进行预测，“学习”的近似误差会减小，只有对于与输入实例相近的训练实例才会对预测起作用，但是缺点在于“学习”的估计误差被放大，对于近邻的实例点非常敏感，当实例点是噪声时，预测容易出错，也就是说K值过小，整体模型容易产生过拟合。K值过大，则恰恰相反。所以一般用交叉验证法来选取最优的K值</p>
+<p>max_iter： 最大迭代次数，如果聚类很难收敛的话，设置最大迭代次数可以让我们及时得到反馈结果，否则程序运行时间会非常长。</p>
+<p>n_init：初始化中心点的运算次数，默认是 10。程序是否能快速收敛和中心点的选择关系非常大，所以在中心点选择上多花一些时间，来争取整体时间上的快速收敛还是非常值得的。由于每一次中心点都是随机生成的，这样得到的结果就有好有坏，非常不确定，所以要运行 n_init 次, 取其中最好的作为初始的中心点。如果 K 值比较大的时候，你可以适当增大 n_init 这个值。</p>
+<p>init {‘k-means++’, ‘random’, ndarray, callable}, default=’k-means++’： 即初始值选择的方式，默认是采用优化过的 k-means++ 方式，你也可以自己指定中心点，或者采用 random 完全随机的方式。自己设置中心点一般是对于个性化的数据进行设置，很少采用。random 的方式则是完全随机的方式，一般推荐采用优化过的 k-means++ 方式。</p>
+<p>algorithm：k-means 的实现算法，有“auto” “full”“elkan”三种。一般来说建议直接用默认的”auto”。简单说下这三个取值的区别，如果你选择”full”采用的是传统的 K-Means 算法，“auto”会根据数据的特点自动选择是选择“full”还是“elkan”。我们一般选择默认的取值，即“auto” 。</p>
+<h2 id="K-means的小运用"><a href="#K-means的小运用" class="headerlink" title="K-means的小运用"></a>K-means的小运用</h2><p>图像分割：图像分割就是利用图像自身的信息，比如颜色、纹理、形状等特征进行划分，将图像分割成不同的区域，划分出来的每个区域就相当于是对图像中的像素进行了聚类。单个区域内的像素之间的相似度大，不同区域间的像素差异性大。这个特性正好符合聚类的特性，所以你可以把图像分割看成是将图像中的信息进行聚类。当然聚类只是分割图像的一种方式，除了聚类，我们还可以基于图像颜色的阈值进行分割，或者基于图像边缘的信息进行分割等</p>
+<p>例如此图：<br><img src="/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/1.jpg" alt="1"><br>为了处理图像信息，需要获取图像数据，尺寸和通道数，然后基于图像中每个通道的数值进行数据规范化。具体而言代码过程如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> PIL.Image <span class="keyword">as</span> image</span><br><span class="line"><span class="keyword">from</span> sklearn.cluster <span class="keyword">import</span> KMeans</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> preprocessing</span><br><span class="line"><span class="keyword">import</span> matplotlib.image <span class="keyword">as</span> mpimg</span><br><span class="line"><span class="comment"># 加载图像，并对数据进行规范化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dealdata</span><span class="params">(filePath)</span>:</span></span><br><span class="line">    f = open(filePath,<span class="string">'rb'</span>)</span><br><span class="line">    data=[]</span><br><span class="line">    <span class="comment"># 得到图像的像素值</span></span><br><span class="line">    img = image.open(f)</span><br><span class="line">    <span class="comment"># 得到图像尺寸</span></span><br><span class="line">    width, height = img.size</span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> range(width):</span><br><span class="line">        <span class="keyword">for</span> y <span class="keyword">in</span> range(height):</span><br><span class="line">            <span class="comment"># 得到点(x,y)的三个通道值</span></span><br><span class="line">            z1, z2, z3 = img.getpixel((x, y))</span><br><span class="line">            data.append([(z1+<span class="number">1</span>)/<span class="number">256.0</span>, (z2+<span class="number">1</span>)/<span class="number">256.0</span>, (z3+<span class="number">1</span>)/<span class="number">256.0</span>])</span><br><span class="line">    f.close()</span><br><span class="line">    <span class="keyword">return</span> width, height, np.mat(data)</span><br><span class="line"><span class="comment"># 加载图像，得到规范化的结果imgData，以及图像尺寸</span></span><br><span class="line"> width, height ,img= dealdata(<span class="string">'./1.jpg'</span>)</span><br><span class="line"><span class="comment"># 用K-Means对图像进行16聚类</span></span><br><span class="line">kmeans =KMeans(n_clusters=<span class="number">16</span>)</span><br><span class="line">label = kmeans.fit_predict(img)</span><br><span class="line"><span class="comment"># 将图像聚类结果，转化成图像尺寸的矩阵</span></span><br><span class="line">label = label.reshape([width, height])</span><br><span class="line"><span class="comment"># 创建个新图像img，用来保存图像聚类压缩后的结果</span></span><br><span class="line">img=image.new(<span class="string">'L'</span>, (width, height))</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> range(width):</span><br><span class="line">    <span class="keyword">for</span> y <span class="keyword">in</span> range(height):</span><br><span class="line"><span class="comment"># 根据类别设置图像灰度, 类别0 灰度值为255， 类别1 灰度值为127</span></span><br><span class="line">img.putpixel((x, y), int(<span class="number">256</span> / (label[x][y] + <span class="number">1</span>)) - <span class="number">1</span>)</span><br><span class="line">img.save(<span class="string">'new.jpg'</span>)</span><br></pre></td></tr></table></figure>
+<p>对代码解释如下：</p>
+<p> jpg 格式的图像是三个通道 (R,G,B)，也就是一个像素点具有 3 个特征值。这里用 z1、z2、z3 来获取平面坐标点 (x,y) 的三个特征值，特征值是在 0-255 之间。为了加快聚类的收敛，我采用 Min-Max 规范化对数据进行规范化。我定义的 dealdata 函数返回的结果包括了针对 (R,G,B) 三个通道规范化的数据，以及图像的尺寸信息。我使用了 fit 和 predict 这两个函数来做数据的训练拟合和预测，因为传入的参数是一样的，可以同时进行 fit 和 predict 操作，这样可以直接使用 fit_predict(data) 得到聚类的结果。得到聚类的结果 label 后，实际上是一个一维的向量，需要把它转化成图像尺寸的矩阵。label 的聚类结果是从 0 开始统计的，当聚类数为 2 的时候，聚类的标识 label=0 或者 1。图像聚类的结果进行可视化，直接看 0 和 1 是看不出来的，还需要将 0 和 1 转化为灰度值。灰度值一般是在 0-255 的范围内，我们可以将 label=0 设定为灰度值 255，label=1 设定为灰度值 127。具体方法是用 int(256/(label[x][y]+1))-1。可视化的时候，主要是通过设置图像的灰度值进行显示。所以我把聚类 label=0 的像素点都统一设置灰度值为 255，把聚类 label=1 的像素点都统一设置灰度值为 127。原来图像的灰度值是在 0-255 之间，现在就只有 2 种颜色（也就是灰度为 255，和灰度 127）</p>
+<p>算法执行完效果如下：</p>
+<p><img src="/2020/07/12/K-means%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/new.jpg" alt="new"></p>
+<p>在实际操作中，我发现不同尺寸的图像，K-Means 运行的时间也是不同的。像素低，算法运行就快，像素高则算法运行就慢。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/11/%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="决策树原理学习笔记">
+      <i class="fa fa-chevron-left"></i> 决策树原理学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/13/CART%20Decision%20Tree/" rel="next" title="CART算法">
+      CART算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#K-means的基本原理"><span class="nav-number">1.</span> <span class="nav-text">K-means的基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#运用sklearn完成算法"><span class="nav-number">1.1.</span> <span class="nav-text">运用sklearn完成算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#K-means的小运用"><span class="nav-number">1.2.</span> <span class="nav-text">K-means的小运用</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xinzhuo Li</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xinzhuo Li</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

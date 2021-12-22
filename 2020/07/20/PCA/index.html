@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xinzhuo777.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="PCA算法原理及实现PCA算法是一种机器学习常见的数据降维方法 主要思想PCA的主要思想是将n维特征映射到k维上，这k维是全新的正交特征也被称为主成分，是在原有n维特征的基础上重新构造出来的k维特征。PCA的工作就是从原始的空间中顺序地找一组相互正交的坐标轴，新的坐标轴的选择与数据本身是密切相关的。其中，第一个新坐标轴选择是原始数据中方差最大的方向，第二个新坐标轴选取是与第一个坐标轴正交的平面中使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PCA算法原理及实现">
+<meta property="og:url" content="http://xinzhuo777.github.io/2020/07/20/PCA/index.html">
+<meta property="og:site_name" content="machine learning">
+<meta property="og:description" content="PCA算法原理及实现PCA算法是一种机器学习常见的数据降维方法 主要思想PCA的主要思想是将n维特征映射到k维上，这k维是全新的正交特征也被称为主成分，是在原有n维特征的基础上重新构造出来的k维特征。PCA的工作就是从原始的空间中顺序地找一组相互正交的坐标轴，新的坐标轴的选择与数据本身是密切相关的。其中，第一个新坐标轴选择是原始数据中方差最大的方向，第二个新坐标轴选取是与第一个坐标轴正交的平面中使">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://xinzhuo777.github.io/2020/07/20/PCA/my%20own%20pca.png">
+<meta property="og:image" content="http://xinzhuo777.github.io/2020/07/20/PCA/sklearn%20pca.png">
+<meta property="article:published_time" content="2020-07-20T08:01:19.000Z">
+<meta property="article:modified_time" content="2020-08-01T05:07:06.000Z">
+<meta property="article:author" content="Xinzhuo Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://xinzhuo777.github.io/2020/07/20/PCA/my%20own%20pca.png">
+
+<link rel="canonical" href="http://xinzhuo777.github.io/2020/07/20/PCA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>PCA算法原理及实现 | machine learning</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="machine learning" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">machine learning</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://xinzhuo777.github.io/2020/07/20/PCA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xinzhuo Li">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="machine learning">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PCA算法原理及实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-07-20 16:01:19" itemprop="dateCreated datePublished" datetime="2020-07-20T16:01:19+08:00">2020-07-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-08-01 13:07:06" itemprop="dateModified" datetime="2020-08-01T13:07:06+08:00">2020-08-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="PCA算法原理及实现"><a href="#PCA算法原理及实现" class="headerlink" title="PCA算法原理及实现"></a>PCA算法原理及实现</h1><p>PCA算法是一种机器学习常见的数据降维方法</p>
+<h2 id="主要思想"><a href="#主要思想" class="headerlink" title="主要思想"></a>主要思想</h2><p>PCA的主要思想是将n维特征映射到k维上，这k维是全新的正交特征也被称为主成分，是在原有n维特征的基础上重新构造出来的k维特征。PCA的工作就是从原始的空间中顺序地找一组相互正交的坐标轴，新的坐标轴的选择与数据本身是密切相关的。其中，第一个新坐标轴选择是原始数据中方差最大的方向，第二个新坐标轴选取是与第一个坐标轴正交的平面中使得方差最大的，第三个轴是与第1,2个轴正交的平面中方差最大的。依次类推，可以得到n个这样的坐标轴。通过这种方式获得的新的坐标轴，我们发现，大部分方差都包含在前面k个坐标轴中，后面的坐标轴所含的方差几乎为0。于是，我们可以忽略余下的坐标轴，只保留前面k个含有绝大部分方差的坐标轴。事实上，这相当于只保留包含绝大部分方差的维度特征，而忽略包含方差几乎为0的特征维度，实现对数据特征的降维处理。</p>
+<h2 id="PCA算法的两种实现方法"><a href="#PCA算法的两种实现方法" class="headerlink" title="PCA算法的两种实现方法"></a>PCA算法的两种实现方法</h2><p>（1）基于特征值分解协方差矩阵</p>
+<p>​        1：去中心化，即每一位特征减去各自的平均值</p>
+<p>​        2：计算协方差矩阵$\frac{1}{n}XX^{T}$</p>
+<p>​        3：用特征值分解求协方差矩阵$\frac{1}{n}XX^{T}$的特征值和特征向量</p>
+<p>​        4：对特征值从大到小排序，选择最大的前k个，将其对应的k个特征向量组成特征向量的矩阵P</p>
+<p>​        5：将数据转换到k个特征向量组成的新的空间，即Y=PX</p>
+<p>（2）基于SVD分解协方差矩阵实现PCA算法</p>
+<p>​        输入一个n维的数据集，将其降维k维</p>
+<p>​        1:去平均值，即每一位的特征值减去平均值</p>
+<p>​        2：计算协方差矩阵</p>
+<p>​        3：通过SVD计算协方差矩阵的特征值与特征向量</p>
+<p>​        4：对特征值从大到小排序，选择最大的前k个，将其对应的k个特征向量组成特征向量的矩阵P</p>
+<p>​        5：将数据转换到k个特征向量组成的新的空间，即Y=PX</p>
+<p>​        （scikit-learn的PCA算法的背后真正的实现就是用的SVD，而不是特征值分解。）</p>
+<h2 id="代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）"><a href="#代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）" class="headerlink" title="代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）"></a>代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loaddataset</span><span class="params">(filename)</span>:</span></span><br><span class="line">    df=pd.read_table(filename,sep=<span class="string">'\t'</span>)</span><br><span class="line">    <span class="keyword">return</span> np.array(df)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">showdata</span><span class="params">(datamat,reconmat)</span>:</span></span><br><span class="line">    fig=plt.figure()</span><br><span class="line">    ax=fig.add_subplot(<span class="number">111</span>)</span><br><span class="line">    ax.scatter(datamat[:,<span class="number">0</span>],datamat[:,<span class="number">1</span>],c=<span class="string">'green'</span>)</span><br><span class="line">    ax.scatter(np.array(reconmat[:,<span class="number">0</span>]),reconmat[:,<span class="number">0</span>],c=<span class="string">'red'</span>)</span><br><span class="line">    plt.show()</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pca</span><span class="params">(datamat,topnfeat=<span class="number">9</span>)</span>:</span></span><br><span class="line">    <span class="comment">#对所有样本去中心化</span></span><br><span class="line">    meanvals=np.mean(datamat,axis=<span class="number">0</span>)</span><br><span class="line">    meanremoved=datamat-meanvals</span><br><span class="line">    <span class="comment">#计算样本的协方差矩阵</span></span><br><span class="line">    covmat=np.cov(meanremoved,rowvar=<span class="number">0</span>)</span><br><span class="line">    <span class="comment">#print(covmat)</span></span><br><span class="line">    <span class="comment">#对协方差矩阵做特征值分解，求得其特征值和特征向量，并将特征值从大到小排序</span></span><br><span class="line">    eigvals,eigvects=np.linalg.eig(np.mat(covmat))</span><br><span class="line">    eigvalind=np.argsort(eigvals)</span><br><span class="line">    eigvalind=eigvalind[:-(topnfeat+<span class="number">1</span>):<span class="number">-1</span>]</span><br><span class="line">    redeigvects=eigvects[:,eigvalind]</span><br><span class="line">    <span class="comment">#降维</span></span><br><span class="line">    lowdatamat=meanremoved*redeigvects</span><br><span class="line">    reconmat=(lowdatamat*redeigvects.T)+meanvals</span><br><span class="line">    <span class="keyword">return</span> np.array(lowdatamat),np.array(reconmat)</span><br><span class="line"></span><br><span class="line">datamat=loaddataset(<span class="string">'testSet.txt'</span>)</span><br><span class="line">lowdatamat,reconmat=pca(datamat,<span class="number">1</span>)</span><br><span class="line">showdata(datamat,reconmat)</span><br><span class="line">print(<span class="string">'\n test for sklearn \n'</span>)</span><br><span class="line"><span class="keyword">from</span> sklearn.decomposition <span class="keyword">import</span> PCA</span><br><span class="line">pca2=PCA(n_components=<span class="number">1</span>)</span><br><span class="line">datamatnew=datamat</span><br><span class="line">pca2.fit(datamatnew)</span><br><span class="line">g=pca2.transform(datamatnew)</span><br><span class="line">print(g)</span><br><span class="line">showdata(datamat,g)</span><br><span class="line">print(<span class="string">'\n'</span>)</span><br><span class="line">print(lowdatamat)</span><br></pre></td></tr></table></figure>
+<p>代码结果对比</p>
+<p><img src="/2020/07/20/PCA/my own pca.png" alt="my own pca"></p>
+<p>这是个人写的pca算法</p>
+<p><img src="/2020/07/20/PCA/sklearn pca.png" alt="sklearn pca"></p>
+<p>sklearn自带的pca算法</p>
+<p>从图像的结果可知，两种算法给出的降维结果其实是一致的，区别的点，是由于本身算法给出的结果的缩放导致</p>
+<h4 id="基于pca算法的直观理解"><a href="#基于pca算法的直观理解" class="headerlink" title="基于pca算法的直观理解"></a>基于pca算法的直观理解</h4><p>n维投影到k维，我们所选择的投影方式使得在每一维上尽可能使得样本的方差最大。详细的数学方面的请自行搜索最大方差理论，当然还有更多数学上的理论解释。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/13/CART%20Decision%20Tree/" rel="prev" title="CART算法">
+      <i class="fa fa-chevron-left"></i> CART算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/01/SVM/" rel="next" title="[SVM]">
+      [SVM] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PCA算法原理及实现"><span class="nav-number">1.</span> <span class="nav-text">PCA算法原理及实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#主要思想"><span class="nav-number">1.1.</span> <span class="nav-text">主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PCA算法的两种实现方法"><span class="nav-number">1.2.</span> <span class="nav-text">PCA算法的两种实现方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）"><span class="nav-number">1.3.</span> <span class="nav-text">代码实现：（基于自己写的代码和sklearn库自带的pca算法对比）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基于pca算法的直观理解"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">基于pca算法的直观理解</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xinzhuo Li</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xinzhuo Li</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

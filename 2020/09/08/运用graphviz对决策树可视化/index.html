@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xinzhuo777.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="运用graphviz对决策树可视化决策树相关的知识我们已经有浅显的了解了（参见原来的博客https:&#x2F;&#x2F;xinzhuo777.github.io&#x2F;2020&#x2F;07&#x2F;11&#x2F;%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0&#x2F;） 由于决策过程我希望能直观化所以我研究了graphviz的一点点用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[graphviz]">
+<meta property="og:url" content="http://xinzhuo777.github.io/2020/09/08/%E8%BF%90%E7%94%A8graphviz%E5%AF%B9%E5%86%B3%E7%AD%96%E6%A0%91%E5%8F%AF%E8%A7%86%E5%8C%96/index.html">
+<meta property="og:site_name" content="machine learning">
+<meta property="og:description" content="运用graphviz对决策树可视化决策树相关的知识我们已经有浅显的了解了（参见原来的博客https:&#x2F;&#x2F;xinzhuo777.github.io&#x2F;2020&#x2F;07&#x2F;11&#x2F;%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0&#x2F;） 由于决策过程我希望能直观化所以我研究了graphviz的一点点用">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/Xinzhuo777/picgo/master/image0001.jpg">
+<meta property="article:published_time" content="2020-09-08T12:55:09.000Z">
+<meta property="article:modified_time" content="2020-09-09T05:21:10.000Z">
+<meta property="article:author" content="Xinzhuo Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Xinzhuo777/picgo/master/image0001.jpg">
+
+<link rel="canonical" href="http://xinzhuo777.github.io/2020/09/08/%E8%BF%90%E7%94%A8graphviz%E5%AF%B9%E5%86%B3%E7%AD%96%E6%A0%91%E5%8F%AF%E8%A7%86%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[graphviz] | machine learning</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="machine learning" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">machine learning</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://xinzhuo777.github.io/2020/09/08/%E8%BF%90%E7%94%A8graphviz%E5%AF%B9%E5%86%B3%E7%AD%96%E6%A0%91%E5%8F%AF%E8%A7%86%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xinzhuo Li">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="machine learning">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [graphviz]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-09-08 20:55:09" itemprop="dateCreated datePublished" datetime="2020-09-08T20:55:09+08:00">2020-09-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-09-09 13:21:10" itemprop="dateModified" datetime="2020-09-09T13:21:10+08:00">2020-09-09</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="运用graphviz对决策树可视化"><a href="#运用graphviz对决策树可视化" class="headerlink" title="运用graphviz对决策树可视化"></a>运用graphviz对决策树可视化</h1><p>决策树相关的知识我们已经有浅显的了解了（参见原来的博客<a href="https://xinzhuo777.github.io/2020/07/11/%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/）">https://xinzhuo777.github.io/2020/07/11/%E5%86%B3%E7%AD%96%E6%A0%91%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/）</a></p>
+<p>由于决策过程我希望能直观化所以我研究了graphviz的一点点用法（更多用法见官网<a href="https://graphviz.org/gallery/）" target="_blank" rel="noopener">https://graphviz.org/gallery/）</a></p>
+<p>Graphviz是一个开源的图（Graph）可视化软件，采用抽象的图和网络来表示结构化的信息。在数据科学领域，Graphviz的一个用途就是实现决策树可视化。</p>
+<p>具体代码如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="comment"># 数据加载</span></span><br><span class="line">train_data =pd.read_csv(<span class="string">'Tan-train.csv'</span>)</span><br><span class="line">test_data = pd.read_csv(<span class="string">'Tan-test.csv'</span>)</span><br><span class="line"><span class="comment"># # 数据探索</span></span><br><span class="line"><span class="comment"># 使用平均年龄来填充年龄中的nan值</span></span><br><span class="line">train_data[<span class="string">'Age'</span>].fillna(train_data[<span class="string">'Age'</span>].mean(), inplace=<span class="literal">True</span>)</span><br><span class="line">test_data[<span class="string">'Age'</span>].fillna(test_data[<span class="string">'Age'</span>].mean(),inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 使用票价的均值填充票价中的nan值</span></span><br><span class="line">train_data[<span class="string">'Fare'</span>].fillna(train_data[<span class="string">'Fare'</span>].mean(), inplace=<span class="literal">True</span>)</span><br><span class="line">test_data[<span class="string">'Fare'</span>].fillna(test_data[<span class="string">'Fare'</span>].mean(),inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 使用登录最多的港口来填充登录港口的nan值</span></span><br><span class="line">train_data[<span class="string">'Embarked'</span>].fillna(<span class="string">'S'</span>, inplace=<span class="literal">True</span>)</span><br><span class="line">test_data[<span class="string">'Embarked'</span>].fillna(<span class="string">'S'</span>,inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 特征选择</span></span><br><span class="line">features = [<span class="string">'Pclass'</span>, <span class="string">'Sex'</span>, <span class="string">'Age'</span>, <span class="string">'SibSp'</span>, <span class="string">'Parch'</span>, <span class="string">'Fare'</span>, <span class="string">'Embarked'</span>]</span><br><span class="line">train_features = train_data[features]</span><br><span class="line">train_labels = train_data[<span class="string">'Survived'</span>]</span><br><span class="line">test_features = test_data[features]</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction <span class="keyword">import</span> DictVectorizer</span><br><span class="line">dvec=DictVectorizer(sparse=<span class="literal">False</span>)</span><br><span class="line">train_features=dvec.fit_transform(train_features.to_dict(orient=<span class="string">'record'</span>))</span><br><span class="line"><span class="comment"># print(dvec.feature_names_)</span></span><br><span class="line"><span class="comment"># print(dvec.feature_names_)</span></span><br><span class="line"><span class="keyword">from</span> sklearn.tree <span class="keyword">import</span> DecisionTreeClassifier</span><br><span class="line"><span class="comment"># 构造ID3决策树</span></span><br><span class="line">clf = DecisionTreeClassifier(criterion=<span class="string">'entropy'</span>)</span><br><span class="line"><span class="comment"># 决策树训练</span></span><br><span class="line">clf.fit(train_features, train_labels)</span><br><span class="line">test_features=dvec.transform(test_features.to_dict(orient=<span class="string">'record'</span>))</span><br><span class="line"><span class="comment"># 决策树预测</span></span><br><span class="line">pred_labels = clf.predict(test_features)</span><br><span class="line">test_answer=pd.read_csv(<span class="string">'gender_submission.csv'</span>)</span><br><span class="line">test_answer_array=np.array(test_answer[<span class="string">'Survived'</span>])</span><br><span class="line">new_array=test_answer_array+pred_labels</span><br><span class="line"><span class="keyword">from</span> collections  <span class="keyword">import</span> Counter</span><br><span class="line">end_for=Counter(new_array)</span><br><span class="line">print(end_for)</span><br><span class="line">acc_decision_tree = round(clf.score(train_features, train_labels), <span class="number">6</span>)</span><br><span class="line">print(<span class="string">u'score准确率为 %.4lf'</span> % acc_decision_tree)</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> cross_val_score</span><br><span class="line"><span class="comment"># 使用K折交叉验证 统计决策树准确率</span></span><br><span class="line">print(<span class="string">u'cross_val_score准确率为 %.4lf'</span> % np.mean(cross_val_score(clf, train_features, train_labels, cv=<span class="number">10</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> tree</span><br><span class="line"><span class="keyword">import</span> graphviz</span><br><span class="line">dot_data = tree.export_graphviz(clf, out_file=<span class="literal">None</span>,</span><br><span class="line">                                feature_names=dvec.feature_names_, <span class="comment"># 特征名称</span></span><br><span class="line">                                class_names=[<span class="string">'No'</span>, <span class="string">'Yes'</span>], <span class="comment"># 目标变量的类别名</span></span><br><span class="line">                                filled=<span class="literal">True</span>, rounded=<span class="literal">True</span>,</span><br><span class="line">                                special_characters=<span class="literal">True</span>)</span><br><span class="line">graph = graphviz.Source(dot_data)</span><br><span class="line">graph.render(<span class="string">'example.gv'</span>, directory=<span class="string">'E:\\log_reg'</span>, view=<span class="literal">True</span>)</span><br><span class="line">print(<span class="string">'Save example.gv file!\n'</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/Xinzhuo777/picgo/master/image0001.jpg"></p>
+<p>重点是下面这段代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from sklearn import tree</span><br><span class="line">import graphviz</span><br><span class="line">dot_data &#x3D; tree.export_graphviz(clf, out_file&#x3D;None,</span><br><span class="line">                                feature_names&#x3D;dvec.feature_names_, # 特征名称</span><br><span class="line">                                class_names&#x3D;[&#39;No&#39;, &#39;Yes&#39;], # 目标变量的类别名</span><br><span class="line">                                filled&#x3D;True, rounded&#x3D;True,</span><br><span class="line">                                special_characters&#x3D;True)</span><br><span class="line">graph &#x3D; graphviz.Source(dot_data)</span><br><span class="line">graph.render(&#39;example.gv&#39;, directory&#x3D;&#39;E:\\log_reg&#39;, view&#x3D;True)</span><br><span class="line">print(&#39;Save example.gv file!\n&#39;)</span><br></pre></td></tr></table></figure>
+<p>我们首先要创立一个dot文件来描述决策树</p>
+<p>tree.export_graphviz参数说明如下：</p>
+<p>feature_names:特征名称，顺序必须和训练样本的数据必须一致</p>
+<p>class_names:类别名称，输入的时候，必须要排序。如将原来的[‘1’, ‘0’]设置为[‘0’, ‘1’]，注意：数据类型必须为str型的</p>
+<p>filled:填充，且必须为True</p>
+<p>node_ids:节点id，且必须为True</p>
+<p>rounded：画的图形边缘是否美化，必须为True</p>
+<p>special_characters:必须为True</p>
+<h4 id="代码原理"><a href="#代码原理" class="headerlink" title="代码原理"></a>代码原理</h4><p>通过一种反向搜索的方法遍历决策树结果，将结果转换成标准sql</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/01/SVM/" rel="prev" title="[SVM]">
+      <i class="fa fa-chevron-left"></i> [SVM]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/12/Docker%E5%9F%BA%E6%9C%AC%E6%83%85%E5%86%B5%E4%B8%8E%E5%AE%89%E8%A3%85/" rel="next" title="Docker基本情况与安装">
+      Docker基本情况与安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#运用graphviz对决策树可视化"><span class="nav-number">1.</span> <span class="nav-text">运用graphviz对决策树可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#代码原理"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">代码原理</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xinzhuo Li</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xinzhuo Li</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
