@@ -171,7 +171,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2021-12-22 21:17:31 / Modified: 21:19:26" itemprop="dateCreated datePublished" datetime="2021-12-22T21:17:31+08:00">2021-12-22</time>
+              <time title="Created: 2021-12-22 21:17:31 / Modified: 21:59:22" itemprop="dateCreated datePublished" datetime="2021-12-22T21:17:31+08:00">2021-12-22</time>
             </span>
 
           
@@ -204,6 +204,20 @@
 <p>进入移动硬盘 然后执行以下操作</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br><span class="line">npm install hexo-deployer-git --save  &#x2F;&#x2F; 文章部署到 git 的模块</span><br><span class="line">（下面为选择安装）</span><br><span class="line">npm install hexo-generator-feed --save  &#x2F;&#x2F; 建立 RSS 订阅</span><br><span class="line">npm install hexo-generator-sitemap --save &#x2F;&#x2F; 建立站点地图</span><br></pre></td></tr></table></figure>
 <p>我这里卡了一会儿，不过应该正常。然后马上发下博客试一下。</p>
+<p>果然有大坑，貌似是GitHub规则改了，从2021年6月份开始吧，有点不太一样了，最后会出现报错</p>
+<p>Error: Spawn failed</p>
+<p>  at ChildProcess.<anonymous> (/Volumes/T7/blog/node_modules/hexo-util/lib/spawn.js:51:21)</anonymous></p>
+<p>  at ChildProcess.emit (node:events:390:28)</p>
+<p>  at Process.ChildProcess._handle.onexit (node:internal/child_process:290:12)</p>
+<p>解决方法如下：</p>
+<p>打开_config.yml配置文件</p>
+<p>修改以下内容</p>
+<p>deploy:</p>
+<p>type: git</p>
+<p>repo: <a href="https://github.com/yourname/yourname.github.io.git" target="_blank" rel="noopener">https://github.com/yourname/yourname.github.io.git</a></p>
+<p>branch: master</p>
+<p>其中的repo修改为</p>
+<p>git@github.com:yourname/yourname.github.io.git</p>
 
       
     </div>
